@@ -12,10 +12,15 @@ rendere tale algoritmo indipendente dalla natura della sorgente dei dati
 - viene inoltre sfruttata una factory realizzata tramite metodo statico
 della classe Record_Reader per eliminare la dipendenza del client dalle
 classi concrete che leggono record
+- viene utilizzato anche il pattern "decorator" per acquisire i nomi
+e i cognomi con il primo carattere maiuscolo e i rimanenti minuscoli;
+anche nei decorator si usa una factory per eliminare la dipendenza del
+client dalle classi concrete di decorator
 """
 
 from json import dump
 from record_readers import Record_Reader
+from record_readers_decorator import Record_Reader_Decorator
 
 
 class Context():
@@ -52,6 +57,9 @@ class Context():
 
             Parameters
             ----------
+            get_record : method
+                restituisce un record sotto forma di dizionario se esiste
+                restituisce un dizionario vuoto altrimenti
 
             Yields
             ------
@@ -100,7 +108,7 @@ def save_json(obj, fname, indnt=3):
         oggetto python da salvare in formato json
     fname : str
         path del file in cui salvare obj
-    indnt : int, optional
+    indent : int, optional
         indentazione da usare per il formato json; il default è 3.
 
     Returns
@@ -120,8 +128,11 @@ if __name__ == "__main__":
         Record_Reader.create_instance(source_type='json file',
                                       fname='../data/agenda_old.json'))
     agenda = context.get_list_of_records()
-    # acquisisce la lista di record da una GUI Qt
-    context.source = Record_Reader.create_instance(source_type='Qt dialog')
+    # acquisisce la lista di record da una GUI Qt assicurandosi che nomi e cognomi
+    # siano stringhe di lettere minuscole che iniziano con maiuscole
+    source = Record_Reader.create_instance(source_type='Qt dialog')
+    context.source = \
+        Record_Reader_Decorator.create_instance(source, decorator_type='capitalize')
     agenda += context.get_list_of_records()
 
     display_records(agenda)

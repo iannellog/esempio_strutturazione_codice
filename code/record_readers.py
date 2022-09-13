@@ -25,7 +25,7 @@ class Record_Reader(ABC):
     """
 
     @abstractmethod
-    def get_record():
+    def get_record(self):
         """
         acquisisce un record e lo restituisce sotto forma di dizionario
         restituisce un dizionario vuoto per indicare che non vi sono altri
