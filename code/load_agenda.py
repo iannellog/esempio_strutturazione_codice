@@ -6,8 +6,8 @@ Created on April 25, 2022
 @author: Giulio Iannello
 
 acquisizione di record da inserire in un'agenda
-versione base strutturata con sottoprogrammi che definiscono un'interfaccia
-per la funzione "get_record"
+versione che introduce un generator per acquisire più record
+e utilizza una comprehension per creare la lista dei record acquisiti
 """
 
 from json import dump
@@ -35,6 +35,24 @@ def get_record():
     record['telefono'] = input('Telefono: ')
     record['email'] = input('Email: ')
     return record
+
+
+def records(get_record):
+    """
+    generatore di record
+
+    Yields
+    ------
+    record : dict
+        il successivo record se esiste
+
+
+    """
+    while True:
+        record = get_record()
+        if record == {}:  # non vi sono altri record da acquisire
+            break
+        yield record
 
 
 def display_records(agenda):
@@ -83,13 +101,8 @@ def save_json(obj, fname, indnt=3):
 
 
 if __name__ == "__main__":
-    # acquisisce i record
-    agenda = []
-    while True:
-        record = get_record()
-        if record == {}:  # non vi sono altri record da acquisire
-            break
-        agenda.append(record)
+    # acquisisce la lista di record
+    agenda = [record for record in records(get_record)]
 
     display_records(agenda)
 
