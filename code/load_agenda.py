@@ -6,31 +6,64 @@ Created on April 25, 2022
 @author: Giulio Iannello
 
 acquisizione di record da inserire in un'agenda
-versione che importa varie classi che implementano l'acquisizione
-di un record da varie sorgenti
+versione che usa il pattern "strategy" per rendere trasparente al client
+l'algoritmo di acquisizione della lista di record e allo stesso tempo
+rendere tale algoritmo indipendente dalla natura della sorgente dei dati
 """
 
 from json import dump
-from record_readers import Record_Stdin_Reader, \
-     Record_JSONfile_Reader, Record_Qt_Dialog_Reader
+from record_readers import Record_Reader, Record_JSONfile_Reader, \
+    Record_Qt_Dialog_Reader
 
 
-def records(get_record):
+class Context:
     """
-    generatore di record
-
-    Yields
-    ------
-    record : dict
-        il successivo record se esiste
-
-
+    interfaccia per ottenere una lista di record da diverse sorgenti
     """
-    while True:
-        record = get_record()
-        if record == {}:  # non vi sono altri record da acquisire
-            break
-        yield record
+
+    def __init__(self, source: Record_Reader):
+        self._source = source
+
+    @property
+    def source(self) -> Record_Reader:
+        return self._source
+
+    @source.setter
+    def source(self, source: Record_Reader):
+        self._source = source
+
+    def get_list_of_records(self):
+        """
+        acquisisce records e li organizza in una lista
+        l'algoritmo è del tutto indipendente dalla natura della sorgente
+        dei dati
+
+        Returns
+        -------
+        list
+            lista di record acquisiti
+        """
+
+        def records():
+            """
+            generatore di record
+
+            Parameters
+            ----------
+
+            Yields
+            ------
+            record : dict
+                il successivo record se esiste
+
+            """
+            while True:
+                record = self._source.get_record()
+                if record == {}:  # non vi sono altri record da acquisire
+                    break
+                yield record
+
+        return [record for record in records()]
 
 
 def display_records(agenda):
@@ -78,12 +111,14 @@ def save_json(obj, fname, indnt=3):
     fout.close()
 
 
+# client
 if __name__ == "__main__":
-    # acquisisce le liste di record
-    agenda = [record for record in records(
-        Record_JSONfile_Reader('../data/agenda_old.json').get_record)]
-    agenda += [record for record in records(Record_Qt_Dialog_Reader().get_record)]
-    agenda += [record for record in records(Record_Stdin_Reader().get_record)]
+    # acquisisce la lista di record da un file JSON
+    context = Context(Record_JSONfile_Reader('../data/agenda_old.json'))
+    agenda = context.get_list_of_records()
+    # acquisisce la lista di record da una GUI Qt
+    context.source = Record_Qt_Dialog_Reader()
+    agenda += context.get_list_of_records()
 
     display_records(agenda)
 
