@@ -6,21 +6,23 @@ Created on April 25, 2022
 @author: Giulio Iannello
 
 acquisizione di record da inserire in un'agenda
-versione base in cui il numero di record da acquisire è fornito a priori
+versione base in cui il numero di record da acquisire non è
+fornito a priori
 """
 
 from json import dump
 
-n = int(input('Dammi il numero di record: '))
-
-# acquisisce n record
+# acquisisce i record
 agenda = []
-for i in range(n):
+while True:
+    nome = input('Nome: ')
+    if nome == 'stop':  # non vi sono altri record da acquisire
+        break
     record = {}
-    record['nome'] = input('Nome: ')
+    record['nome'] = nome
     record['cognome'] = input('Cognome: ')
     record['telefono'] = input('Telefono: ')
-    record['email'] = input('Email: ')    
+    record['email'] = input('Email: ')
     agenda.append(record)
 
 # visualizza i record acquisiti
