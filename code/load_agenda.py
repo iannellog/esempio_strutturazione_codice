@@ -6,10 +6,11 @@ Created on April 25, 2022
 @author: Giulio Iannello
 
 acquisizione di record da inserire in un'agenda
-versione che introduce una classe che incapsula l'acquisizione di un record
+versione che introduce una seconda classe che implementa l'acquisizione
+di un record da una lista memorizzata in un file in formato JSON
 """
 
-from json import dump
+from json import dump, load
 
 
 class Record_Stdin_Reader():
@@ -42,6 +43,37 @@ class Record_Stdin_Reader():
         record['telefono'] = input('Telefono: ')
         record['email'] = input('Email: ')
         return record
+
+
+class Record_JSONfile_Reader():
+    """
+    reader of records from standard input
+    """
+
+    def __init__(self, fname):
+        self.fin = open(fname)
+        self.data = load(self.fin)
+        self.fin.close()
+        self.next_record = 0
+
+    def get_record(self):
+        """
+        acquisisce un record e lo restituisce sotto forma di dizionario
+        restituisce un dizionario vuoto per indicare che non vi sono altri
+        record da acquisire
+
+        Returns
+        -------
+        dict
+            il record sotto forma di dizionario
+            restituisce un dizionario vuoto per indicare che non vi sono altri
+            record da acquisire
+        """
+        if self.next_record < len(self.data):  # there is another record
+            self.next_record += 1
+            return self.data[self.next_record - 1]
+        else:
+            return {}
 
 
 def records(get_record):
@@ -110,6 +142,8 @@ def save_json(obj, fname, indnt=3):
 if __name__ == "__main__":
     # acquisisce la lista di record
     agenda = [record for record in records(Record_Stdin_Reader().get_record)]
+    agenda += [record for record in records(
+        Record_JSONfile_Reader('../data/agenda_old.json').get_record)]
 
     display_records(agenda)
 
