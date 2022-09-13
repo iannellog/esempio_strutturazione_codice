@@ -6,11 +6,8 @@ Created on Wed Jun 29 14:55:43 2022
 @author: iannello
 
 acquisizione di record da inserire in un'agenda
-introduzione di una classe astratta che implementa l'interfaccia
-di un reader di record da cui derivano diverse classi concrete di
-reader
-la classe astratta consente di implementare il pattern "Strategy"
-nel client
+aggiunta di un metodo statico nella classe astratta Record_Reader
+che funge da factory
 """
 
 from json import load
@@ -28,7 +25,7 @@ class Record_Reader(ABC):
     """
 
     @abstractmethod
-    def get_record(self):
+    def get_record():
         """
         acquisisce un record e lo restituisce sotto forma di dizionario
         restituisce un dizionario vuoto per indicare che non vi sono altri
@@ -43,6 +40,41 @@ class Record_Reader(ABC):
         """
 
         pass
+
+    @staticmethod
+    def create_instance(**kwargs):
+        """
+        crea un istanza di una sottoclasse concreta
+
+        Parameters
+        ----------
+        **kwargs : dict
+            parametri opzionali per controllare quale sottoclasse
+            creare
+
+        Raises
+        ------
+        ValueError
+            genera un'eccezione se non viene indicato quale sottoclasse
+            creare o se viene indicata una sottoclasse inesistente
+
+        Returns
+        -------
+        Record_Reader
+            un'istanza della sottoclasse richiesta
+
+        """
+
+        if 'source_type' not in kwargs.keys():
+            raise ValueError('missing type of record reader')
+        if kwargs['source_type'] == 'stdin':
+            return Record_Stdin_Reader()
+        elif kwargs['source_type'] == 'Qt dialog':
+            return Record_Qt_Dialog_Reader()
+        elif kwargs['source_type'] == 'json file':
+            return Record_JSONfile_Reader(kwargs['fname'])
+        else:
+            raise ValueError(f'unknown source type {kwargs["source_type"]}')
 
 
 class Record_Stdin_Reader(Record_Reader):

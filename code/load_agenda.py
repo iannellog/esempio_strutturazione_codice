@@ -6,17 +6,19 @@ Created on April 25, 2022
 @author: Giulio Iannello
 
 acquisizione di record da inserire in un'agenda
-versione che usa il pattern "strategy" per rendere trasparente al client
+- versione che usa il pattern "strategy" per rendere trasparente al client
 l'algoritmo di acquisizione della lista di record e allo stesso tempo
 rendere tale algoritmo indipendente dalla natura della sorgente dei dati
+- viene inoltre sfruttata una factory realizzata tramite metodo statico
+della classe Record_Reader per eliminare la dipendenza del client dalle
+classi concrete che leggono record
 """
 
 from json import dump
-from record_readers import Record_Reader, Record_JSONfile_Reader, \
-    Record_Qt_Dialog_Reader
+from record_readers import Record_Reader
 
 
-class Context:
+class Context():
     """
     interfaccia per ottenere una lista di record da diverse sorgenti
     """
@@ -114,10 +116,12 @@ def save_json(obj, fname, indnt=3):
 # client
 if __name__ == "__main__":
     # acquisisce la lista di record da un file JSON
-    context = Context(Record_JSONfile_Reader('../data/agenda_old.json'))
+    context = Context(
+        Record_Reader.create_instance(source_type='json file',
+                                      fname='../data/agenda_old.json'))
     agenda = context.get_list_of_records()
     # acquisisce la lista di record da una GUI Qt
-    context.source = Record_Qt_Dialog_Reader()
+    context.source = Record_Reader.create_instance(source_type='Qt dialog')
     agenda += context.get_list_of_records()
 
     display_records(agenda)
