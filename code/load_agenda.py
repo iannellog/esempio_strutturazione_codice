@@ -6,74 +6,13 @@ Created on April 25, 2022
 @author: Giulio Iannello
 
 acquisizione di record da inserire in un'agenda
-versione che introduce una seconda classe che implementa l'acquisizione
-di un record da una lista memorizzata in un file in formato JSON
+versione che importa varie classi che implementano l'acquisizione
+di un record da varie sorgenti
 """
 
-from json import dump, load
-
-
-class Record_Stdin_Reader():
-    """
-    reader of records from standard input
-    """
-
-    def __init__(self):
-        pass
-
-    def get_record(self):
-        """
-        acquisisce un record e lo restituisce sotto forma di dizionario
-        restituisce un dizionario vuoto per indicare che non vi sono altri
-        record da acquisire
-
-        Returns
-        -------
-        dict
-            il record sotto forma di dizionario
-            restituisce un dizionario vuoto per indicare che non vi sono altri
-            record da acquisire
-        """
-        nome = input('Nome: ')
-        if nome == 'stop':
-            return {}
-        record = {}
-        record['nome'] = nome
-        record['cognome'] = input('Cognome: ')
-        record['telefono'] = input('Telefono: ')
-        record['email'] = input('Email: ')
-        return record
-
-
-class Record_JSONfile_Reader():
-    """
-    reader of records from standard input
-    """
-
-    def __init__(self, fname):
-        self.fin = open(fname)
-        self.data = load(self.fin)
-        self.fin.close()
-        self.next_record = 0
-
-    def get_record(self):
-        """
-        acquisisce un record e lo restituisce sotto forma di dizionario
-        restituisce un dizionario vuoto per indicare che non vi sono altri
-        record da acquisire
-
-        Returns
-        -------
-        dict
-            il record sotto forma di dizionario
-            restituisce un dizionario vuoto per indicare che non vi sono altri
-            record da acquisire
-        """
-        if self.next_record < len(self.data):  # there is another record
-            self.next_record += 1
-            return self.data[self.next_record - 1]
-        else:
-            return {}
+from json import dump
+from record_readers import Record_Stdin_Reader, \
+     Record_JSONfile_Reader, Record_Qt_Dialog_Reader
 
 
 def records(get_record):
@@ -126,7 +65,7 @@ def save_json(obj, fname, indnt=3):
         oggetto python da salvare in formato json
     fname : str
         path del file in cui salvare obj
-    indent : int, optional
+    indnt : int, optional
         indentazione da usare per il formato json; il default è 3.
 
     Returns
@@ -140,10 +79,11 @@ def save_json(obj, fname, indnt=3):
 
 
 if __name__ == "__main__":
-    # acquisisce la lista di record
-    agenda = [record for record in records(Record_Stdin_Reader().get_record)]
-    agenda += [record for record in records(
+    # acquisisce le liste di record
+    agenda = [record for record in records(
         Record_JSONfile_Reader('../data/agenda_old.json').get_record)]
+    agenda += [record for record in records(Record_Qt_Dialog_Reader().get_record)]
+    agenda += [record for record in records(Record_Stdin_Reader().get_record)]
 
     display_records(agenda)
 

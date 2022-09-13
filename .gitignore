@@ -3,3 +3,5 @@ env/*
 .idea/*
 temp/*
 __pycache__/*
+code/__pycache__/*
+code/ui/__pycache__/*
