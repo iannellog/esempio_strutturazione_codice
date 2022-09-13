@@ -6,35 +6,42 @@ Created on April 25, 2022
 @author: Giulio Iannello
 
 acquisizione di record da inserire in un'agenda
-versione che introduce un generator per acquisire più record
-e utilizza una comprehension per creare la lista dei record acquisiti
+versione che introduce una classe che incapsula l'acquisizione di un record
 """
 
 from json import dump
 
 
-def get_record():
+class Record_Stdin_Reader():
     """
-    acquisisce un record e lo restituisce sotto forma di dizionario
-    restituisce un dizionario vuoto per indicare che non vi sono altri
-    record da acquisire
+    reader of records from standard input
+    """
 
-    Returns
-    -------
-    dict
-        il record sotto forma di dizionario
+    def __init__(self):
+        pass
+
+    def get_record(self):
+        """
+        acquisisce un record e lo restituisce sotto forma di dizionario
         restituisce un dizionario vuoto per indicare che non vi sono altri
         record da acquisire
-    """
-    nome = input('Nome: ')
-    if nome == 'stop':
-        return {}
-    record = {}
-    record['nome'] = nome
-    record['cognome'] = input('Cognome: ')
-    record['telefono'] = input('Telefono: ')
-    record['email'] = input('Email: ')
-    return record
+
+        Returns
+        -------
+        dict
+            il record sotto forma di dizionario
+            restituisce un dizionario vuoto per indicare che non vi sono altri
+            record da acquisire
+        """
+        nome = input('Nome: ')
+        if nome == 'stop':
+            return {}
+        record = {}
+        record['nome'] = nome
+        record['cognome'] = input('Cognome: ')
+        record['telefono'] = input('Telefono: ')
+        record['email'] = input('Email: ')
+        return record
 
 
 def records(get_record):
@@ -102,7 +109,7 @@ def save_json(obj, fname, indnt=3):
 
 if __name__ == "__main__":
     # acquisisce la lista di record
-    agenda = [record for record in records(get_record)]
+    agenda = [record for record in records(Record_Stdin_Reader().get_record)]
 
     display_records(agenda)
 
